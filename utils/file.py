@@ -14,13 +14,10 @@ def save_uploaded_file(file: UploadFile, upload_dir: str = "uploads") -> str:
     Returns:
         Path to the saved file
     """
-    # Create upload directory if it doesn't exist
     Path(upload_dir).mkdir(parents=True, exist_ok=True)
-    
-    # Generate file path
+
     file_path = os.path.join(upload_dir, file.filename)
-    
-    # Save file
+
     with open(file_path, "wb") as f:
         content = file.file.read()
         f.write(content)
