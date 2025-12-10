@@ -3,6 +3,7 @@ from fastapi.responses import Response
 from services.docx import replace_keywords
 from utils.file import generate_output_filename
 import json
+from urllib.parse import quote
 
 router = APIRouter()
 
@@ -25,11 +26,16 @@ async def replace_document_keywords(
         
         output_filename = generate_output_filename(file.filename)
         
+        # Use RFC 5987 encoding for filenames with non-ASCII characters
+        # Format: filename*=UTF-8''encoded-name
+        encoded_filename = quote(output_filename, safe='')
+        content_disposition = f"attachment; filename*=UTF-8''{encoded_filename}"
+        
         return Response(
             content=output_content,
             # https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
             media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            headers={"Content-Disposition": f"attachment; filename={output_filename}"}
+            headers={"Content-Disposition": content_disposition}
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
