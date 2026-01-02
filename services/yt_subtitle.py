@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 from typing import List
 import webvtt
+from docx import Document
+from io import BytesIO
 
 
 def download_youtube_subtitle(urls: List[str], subtitle_lang: str = "en") -> List[str]:
@@ -87,6 +89,8 @@ def extract_text_from_vtt(vtt_contents: List[str]) -> List[str]:
             
             # Join all text lines with spaces to form a complete text
             complete_text = ' '.join(text_lines)
+            # Remove all newline characters
+            complete_text = complete_text.replace('\n', ' ').replace('\r', '')
             results.append(complete_text)
             
         except Exception as e:
@@ -97,3 +101,45 @@ def extract_text_from_vtt(vtt_contents: List[str]) -> List[str]:
                 os.unlink(temp_file_path)
     
     return results
+
+
+def get_video_title(url: str) -> str:
+    """
+    Get video title from YouTube URL.
+    
+    Args:
+        url: YouTube video URL
+        
+    Returns:
+        Video title as string (sanitized for filename use)
+    """
+    ydl_opts = {}
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            title = info.get('title', 'video')
+            # Sanitize filename: remove invalid characters
+            title = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_')).strip()
+            return title if title else 'video'
+    except Exception as e:
+        raise Exception(f"Failed to get video title for URL {url}: {str(e)}")
+
+
+def create_word_document(text: str) -> bytes:
+    """
+    Create a Word document from text content.
+    
+    Args:
+        text: Text content to put in the document
+        
+    Returns:
+        Word document content as bytes
+    """
+    document = Document()
+    # Add text to document
+    document.add_paragraph(text)
+    
+    output = BytesIO()
+    document.save(output)
+    output.seek(0)
+    return output.getvalue()

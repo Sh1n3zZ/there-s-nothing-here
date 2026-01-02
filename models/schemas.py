@@ -1,19 +1,10 @@
 from pydantic import BaseModel
 from typing import Dict, Optional, List
 
-class ReplaceRequest(BaseModel):
-    """Request model for keyword replacement."""
-    replacements: Dict[str, str]
-
-class ReplaceResponse(BaseModel):
-    """Response model for keyword replacement."""
-    success: bool
-    message: str
-    output_filename: str = None
-
 class YouTubeSubtitleRequest(BaseModel):
     """Request model for YouTube subtitle download."""
     urls: List[str]
+    output_word: bool = False
 
 
 class YouTubeSubtitleResponse(BaseModel):
