@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 class ReplaceRequest(BaseModel):
     """Request model for keyword replacement."""
@@ -13,11 +13,11 @@ class ReplaceResponse(BaseModel):
 
 class YouTubeSubtitleRequest(BaseModel):
     """Request model for YouTube subtitle download."""
-    url: str
+    urls: List[str]
 
 
 class YouTubeSubtitleResponse(BaseModel):
     """Response model for YouTube subtitle download."""
     success: bool
     message: str
-    subtitle_text: Optional[str] = None
+    subtitle_texts: Optional[List[str]] = None

@@ -8,25 +8,25 @@ router = APIRouter()
 @router.post("/download", response_model=YouTubeSubtitleResponse)
 async def download_youtube_subtitle_endpoint(request: YouTubeSubtitleRequest):
     """
-    Download subtitle from YouTube video and return as text content.
+    Download subtitles from YouTube videos and return as text contents.
     
     Args:
-        request: YouTubeSubtitleRequest containing the YouTube URL
+        request: YouTubeSubtitleRequest containing a list of YouTube URLs
         
     Returns:
-        YouTubeSubtitleResponse with subtitle text content
+        YouTubeSubtitleResponse with list of subtitle text contents
     """
     try:
-        # Download VTT format subtitle
-        vtt_content = download_youtube_subtitle(request.url)
+        # Download VTT format subtitles
+        vtt_contents = download_youtube_subtitle(request.urls)
         
         # Extract text content from VTT
-        subtitle_text = extract_text_from_vtt(vtt_content)
+        subtitle_texts = extract_text_from_vtt(vtt_contents)
         
         return YouTubeSubtitleResponse(
             success=True,
-            message="Subtitle downloaded and extracted successfully",
-            subtitle_text=subtitle_text
+            message=f"Successfully downloaded and extracted subtitles from {len(subtitle_texts)} video(s)",
+            subtitle_texts=subtitle_texts
         )
     except Exception as e:
         raise HTTPException(
