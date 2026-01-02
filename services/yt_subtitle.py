@@ -6,6 +6,7 @@ from typing import List
 import webvtt
 from docx import Document
 from io import BytesIO
+import base64
 
 
 def download_youtube_subtitle(urls: List[str], subtitle_lang: str = "en") -> List[str]:
@@ -31,6 +32,22 @@ def download_youtube_subtitle(urls: List[str], subtitle_lang: str = "en") -> Lis
                 'subtitlesformat': 'vtt',
                 'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
             }
+            
+            # Add cookiefile from environment variable if set
+            # YOUTUBE_COOKIE_FILE contains base64-encoded cookie file content
+            cookie_content = os.getenv('YOUTUBE_COOKIE_FILE')
+            cookie_file_path = None
+            if cookie_content:
+                try:
+                    # Decode base64-encoded cookie content
+                    decoded_content = base64.b64decode(cookie_content).decode('utf-8')
+                    # Write cookie content to a temporary file
+                    cookie_file_path = os.path.join(temp_dir, 'cookies.txt')
+                    with open(cookie_file_path, 'w', encoding='utf-8') as f:
+                        f.write(decoded_content)
+                    ydl_opts['cookiefile'] = cookie_file_path
+                except Exception as e:
+                    raise Exception(f"Failed to decode cookie content from YOUTUBE_COOKIE_FILE: {str(e)}")
             
             try:
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
